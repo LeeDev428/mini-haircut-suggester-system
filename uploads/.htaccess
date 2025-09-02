@@ -1,0 +1,11 @@
+# Allow access to uploaded images
+<Files ~ "\.(jpg|jpeg|png|gif|webp)$">
+    Order allow,deny
+    Allow from all
+</Files>
+
+# Prevent access to PHP files in uploads
+<Files ~ "\.php$">
+    Order deny,allow
+    Deny from all
+</Files>
