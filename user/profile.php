@@ -122,7 +122,7 @@ startLayout('Profile Settings', 'profile');
         width: 120px;
         height: 120px;
         border-radius: 50%;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: var(--primary-gradient);
         color: white;
         display: flex;
         align-items: center;
@@ -144,7 +144,7 @@ startLayout('Profile Settings', 'profile');
         display: flex;
         align-items: center;
         justify-content: center;
-        color: #667eea;
+    color: var(--primary-color);
         cursor: pointer;
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
     }
@@ -181,7 +181,7 @@ startLayout('Profile Settings', 'profile');
     .stat-number {
         font-size: 24px;
         font-weight: bold;
-        color: #667eea;
+    color: var(--primary-color);
         margin-bottom: 5px;
     }
     
@@ -218,7 +218,7 @@ startLayout('Profile Settings', 'profile');
     }
     
     .section-title i {
-        color: #667eea;
+    color: var(--primary-color);
     }
     
     .form-grid {
@@ -259,7 +259,7 @@ startLayout('Profile Settings', 'profile');
     .form-group input:focus,
     .form-group select:focus {
         outline: none;
-        border-color: #667eea;
+    border-color: var(--primary-color);
         box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
     }
     
@@ -270,7 +270,7 @@ startLayout('Profile Settings', 'profile');
     }
     
     .btn-primary {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: var(--primary-gradient);
         color: white;
         border: none;
         padding: 14px 28px;

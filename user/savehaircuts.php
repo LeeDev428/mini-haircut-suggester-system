@@ -89,7 +89,7 @@ startLayout('Saved Haircuts', 'saved-haircuts');
     .page-title {
         font-size: 2.5em;
         font-weight: bold;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: var(--primary-gradient);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         background-clip: text;
@@ -121,7 +121,7 @@ startLayout('Saved Haircuts', 'saved-haircuts');
     }
     
     .tab.active {
-        color: #667eea;
+    color: var(--primary-color);
     }
     
     .tab.active::after {
@@ -131,7 +131,7 @@ startLayout('Saved Haircuts', 'saved-haircuts');
         left: 0;
         right: 0;
         height: 3px;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: var(--primary-gradient);
         border-radius: 2px;
     }
     
@@ -243,7 +243,7 @@ startLayout('Saved Haircuts', 'saved-haircuts');
     }
     
     .tag.category {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: var(--primary-gradient);
         color: white;
     }
     
@@ -271,7 +271,7 @@ startLayout('Saved Haircuts', 'saved-haircuts');
     
     .notes-input:focus {
         outline: none;
-        border-color: #667eea;
+    border-color: var(--primary-color);
         box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
     }
     
@@ -290,7 +290,7 @@ startLayout('Saved Haircuts', 'saved-haircuts');
     }
     
     .btn-primary {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: var(--primary-gradient);
         color: white;
     }
     
@@ -352,7 +352,7 @@ startLayout('Saved Haircuts', 'saved-haircuts');
     <div class="alert alert-error" id="errorAlert"></div>
     
     <div class="tabs">
-        <button class="tab active" onclick="switchTab('saved')">
+    <button class="tab active" onclick="switchTab('saved', this)">
             <i class="fas fa-heart"></i> My Saved (<?php echo count($saved_haircuts); ?>)
         </button>
        
@@ -465,13 +465,13 @@ startLayout('Saved Haircuts', 'saved-haircuts');
 </div>
 
 <script>
-function switchTab(tabName) {
+function switchTab(tabName, btn) {
     // Remove active class from all tabs and contents
     document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
     document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
     
     // Add active class to clicked tab and corresponding content
-    event.target.classList.add('active');
+    if (btn) { btn.classList.add('active'); }
     document.getElementById(tabName + '-tab').classList.add('active');
 }
 

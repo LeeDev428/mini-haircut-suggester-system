@@ -6,12 +6,13 @@
 }
 
 :root {
-    --primary-color: #ff6b8a;
-    --primary-gradient: linear-gradient(135deg, #ff6b8a, #ff8aa6);
-    --secondary-color: #667eea;
-    --secondary-gradient: linear-gradient(135deg, #667eea, #764ba2);
-    --accent-color: #4ecdc4;
-    --dark-color: #2c3e50;
+    /* Updated palette: blue/cyan primary, dark slate secondary, amber accent */
+    --primary-color: #0ea5e9; /* sky-500 */
+    --primary-gradient: linear-gradient(135deg, #0ea5e9, #22d3ee); /* sky -> cyan */
+    --secondary-color: #0b2545; /* deep navy */
+    --secondary-gradient: linear-gradient(135deg, #0b2545, #13315c); /* dark blue */
+    --accent-color: #f59e0b; /* amber-500 */
+    --dark-color: #1f2937; /* slate-800 */
     --light-color: #ffffff;
     --gray-light: #f8f9fa;
     --gray-medium: #6c757d;
@@ -73,7 +74,7 @@ h4 { font-size: 1.25rem; }
 
 .btn-primary:hover {
     transform: translateY(-2px);
-    box-shadow: 0 10px 25px rgba(255, 107, 138, 0.3);
+    box-shadow: 0 10px 25px rgba(14, 165, 233, 0.3);
 }
 
 .btn-secondary {
@@ -99,7 +100,7 @@ h4 { font-size: 1.25rem; }
 }
 
 .btn-login {
-    background: var(--secondary-gradient);
+    background: var(--primary-gradient);
     color: white;
     padding: 10px 20px;
     border-radius: 20px;
@@ -109,7 +110,7 @@ h4 { font-size: 1.25rem; }
 
 .btn-login:hover {
     transform: translateY(-1px);
-    box-shadow: var(--shadow-medium);
+    box-shadow: 0 8px 20px rgba(34, 211, 238, 0.35);
 }
 
 .btn-large {
@@ -148,6 +149,45 @@ h4 { font-size: 1.25rem; }
 .nav-logo i {
     color: var(--primary-color);
     margin-right: 8px;
+}
+
+/* Brand logo image */
+.brand-logo {
+    height: 60px; /* larger logo for better visibility */
+    width: 60px;  /* square for consistent scaling */
+    display: block;
+    object-fit: contain; /* keep aspect without cropping */
+}
+
+/* Wrap to trim outer whitespace and allow subtle zoom of artwork */
+.brand-logo-wrap {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    overflow: hidden; /* clip transparent margins of source image */
+    background: #ffffff;
+}
+
+.brand-logo-wrap .brand-logo {
+    width: 80px;  /* slight zoom to emphasize inner mark */
+    height: 80px;
+}
+
+.brand-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px; /* tighter spacing */
+    text-decoration: none;
+}
+
+.brand-title {
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--dark-color);
+    letter-spacing: 0.3px;
 }
 
 .nav-links {
@@ -323,6 +363,16 @@ h4 { font-size: 1.25rem; }
     display: block;
 }
 
+/* Ensure the logo fits nicely in the hero image box */
+.image-container img.hero-logo {
+    background: transparent;
+    object-fit: cover; /* fill the box */
+    object-position: center; /* center inside the frame */
+    width: 100%;
+    height: 500px;
+    padding: 0;
+}
+
 .image-overlay {
     position: absolute;
     top: 20px;
@@ -343,7 +393,7 @@ h4 { font-size: 1.25rem; }
 }
 
 .style-badge i {
-    color: #ffd700;
+    color: var(--accent-color);
 }
 
 .floating-elements {

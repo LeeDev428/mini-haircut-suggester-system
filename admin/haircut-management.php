@@ -211,14 +211,14 @@ startAdminLayout('Haircut Management', 'haircuts');
     }
     
     .form-group input[type="file"]:hover {
-        border-color: #667eea;
+        border-color: var(--primary-color);
         background: #f0f4ff;
     }
     
     .form-group input[type="file"]:focus {
         outline: none;
-        border-color: #667eea;
-        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.15);
     }
     
     .current-image {
@@ -251,8 +251,8 @@ startAdminLayout('Haircut Management', 'haircuts');
     .form-group select:focus,
     .form-group textarea:focus {
         outline: none;
-        border-color: #667eea;
-        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.15);
     }
     
     .form-group textarea {
@@ -293,7 +293,7 @@ startAdminLayout('Haircut Management', 'haircuts');
     }
     
     .btn-primary {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: var(--primary-gradient);
         color: white;
     }
     
@@ -440,7 +440,7 @@ startAdminLayout('Haircut Management', 'haircuts');
 
 <div class="management-container">
     <div class="page-header" style="text-align: center; margin-bottom: 40px;">
-        <h1 style="font-size: 2.5em; font-weight: bold; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 10px;">Haircut Management</h1>
+    <h1 style="font-size: 2.5em; font-weight: bold; background: var(--primary-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 10px;">Haircut Management</h1>
         <p style="color: #6b7280; font-size: 1.1em;">Add, edit, and manage all haircuts</p>
     </div>
     

@@ -6,7 +6,7 @@ $pdo = getDatabaseConnection();
 // Get dashboard statistics
 $stmt = $pdo->prepare("
     SELECT 
-        COALESCE((SELECT COUNT(*) FROM users WHERE is_admin = 0), 0) as total_users,
+    COALESCE((SELECT COUNT(*) FROM users WHERE role = 'user'), 0) as total_users,
         COALESCE((SELECT COUNT(*) FROM appointments), 0) as total_appointments,
         COALESCE((SELECT COUNT(*) FROM appointments WHERE status = 'confirmed'), 0) as confirmed_appointments,
         COALESCE((SELECT COUNT(*) FROM appointments WHERE status = 'cancelled'), 0) as cancelled_appointments,
@@ -55,7 +55,7 @@ $topHaircuts = $stmt->fetchAll();
 $stmt = $pdo->prepare("
     SELECT first_name, last_name, email, created_at 
     FROM users 
-    WHERE is_admin = 0 
+    WHERE role = 'user' 
     ORDER BY created_at DESC 
     LIMIT 5
 ");
@@ -370,7 +370,7 @@ startAdminLayout('Admin Dashboard', 'dashboard');
                     <i class="fas fa-star"></i>
                     Top Haircuts
                 </h3>
-                <a href="manage-haircuts.php" class="btn btn-sm btn-outline">View All</a>
+                <a href="haircut-management.php" class="btn btn-sm btn-outline">View All</a>
             </div>
             <div style="max-height: 300px; overflow-y: auto;">
                 <?php if (empty($topHaircuts)): ?>
@@ -403,7 +403,7 @@ startAdminLayout('Admin Dashboard', 'dashboard');
             <i class="fas fa-users"></i>
             Manage Users
         </a>
-        <a href="manage-haircuts.php" class="quick-action">
+    <a href="haircut-management.php" class="quick-action">
             <i class="fas fa-cut"></i>
             Manage Haircuts
         </a>
@@ -510,7 +510,7 @@ startAdminLayout('Admin Dashboard', 'dashboard');
                 show: false
             }
         },
-        colors: ['#667eea', '#f093fb'],
+    colors: ['#0ea5e9', '#22d3ee'],
         dataLabels: {
             enabled: false
         },
@@ -537,7 +537,7 @@ startAdminLayout('Admin Dashboard', 'dashboard');
                 title: {
                     text: 'Appointments',
                     style: {
-                        color: '#667eea'
+                        color: '#0ea5e9'
                     }
                 },
                 labels: {

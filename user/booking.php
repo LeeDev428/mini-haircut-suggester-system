@@ -123,7 +123,7 @@ $upcomingAppointments = $stmt->fetchAll();
     }
     
     .calendar-header {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: var(--primary-gradient);
         color: white;
         padding: 20px;
         display: flex;
@@ -202,12 +202,12 @@ $upcomingAppointments = $stmt->fetchAll();
     }
     
     .calendar-day.selected {
-        background: #667eea;
+        background: var(--primary-color);
         color: white;
         font-weight: 700;
         transform: scale(1.1);
         z-index: 3;
-        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        box-shadow: 0 4px 15px rgba(14, 165, 233, 0.35);
     }
     
     .calendar-day.today {
@@ -537,7 +537,7 @@ $upcomingAppointments = $stmt->fetchAll();
                         <label>Preferred Stylist (Optional)</label>
                         <div class="stylist-grid">
                             <?php foreach ($stylists as $stylist): ?>
-                                <div class="stylist-card" onclick="selectStylist('<?php echo htmlspecialchars($stylist['name']); ?>')">
+                                <div class="stylist-card" onclick="selectStylist('<?php echo htmlspecialchars($stylist['name']); ?>', this)">
                                     <div class="stylist-name"><?php echo htmlspecialchars($stylist['name']); ?></div>
                                     <div class="stylist-rating">
                                         <?php for ($i = 0; $i < 5; $i++): ?>
@@ -575,9 +575,9 @@ $upcomingAppointments = $stmt->fetchAll();
                     </div>
                 </div>
                 
-                <button type="submit" class="btn btn-primary btn-full" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #fff; border: none;">
+                <button type="submit" class="btn btn-primary btn-full" style="background: var(--primary-gradient); color: #fff; border: none;">
                     <i class="fas fa-calendar-check"></i>
-                    Book Appointment</button></button>
+                    Book Appointment
                 </button>
             </form>
         </div>
@@ -681,7 +681,7 @@ document.addEventListener('DOMContentLoaded', function() {
             // Add click handler for selectable days
             if (!dayElement.classList.contains('disabled')) {
                 dayElement.addEventListener('click', function() {
-                    selectDate(day);
+                    selectDate(day, this);
                 });
             }
             
@@ -689,14 +689,16 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
-    function selectDate(date) {
+    function selectDate(date, el) {
         // Remove previous selection
         document.querySelectorAll('.calendar-day.selected').forEach(el => {
             el.classList.remove('selected');
         });
         
         // Add selection to clicked day
-        event.target.classList.add('selected');
+        if (el) {
+            el.classList.add('selected');
+        }
         
         selectedDate = date;
         document.getElementById('selectedDate').value = formatDate(date);
@@ -720,13 +722,13 @@ document.addEventListener('DOMContentLoaded', function() {
             slot.className = 'time-slot';
             slot.textContent = formatTime(time);
             slot.addEventListener('click', function() {
-                selectTime(time);
+                selectTime(time, this);
             });
             timeSlotsContainer.appendChild(slot);
         });
     }
     
-    function selectTime(time) {
+    function selectTime(time, el) {
         if (!selectedDate) {
             alert('Please select a date first');
             return;
@@ -738,7 +740,9 @@ document.addEventListener('DOMContentLoaded', function() {
         });
         
         // Add selection to clicked time
-        event.target.classList.add('selected');
+        if (el) {
+            el.classList.add('selected');
+        }
         
         selectedTime = time;
         document.getElementById('selectedTime').value = time;
@@ -746,14 +750,16 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log('Selected time:', time);
     }
     
-    function selectStylist(stylistName) {
+    function selectStylist(stylistName, cardEl) {
         // Remove previous selection
         document.querySelectorAll('.stylist-card.selected').forEach(el => {
             el.classList.remove('selected');
         });
         
         // Add selection to clicked stylist
-        event.target.closest('.stylist-card').classList.add('selected');
+        if (cardEl) {
+            cardEl.classList.add('selected');
+        }
         
         document.getElementById('selectedStylist').value = stylistName;
         

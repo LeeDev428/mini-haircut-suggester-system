@@ -12,17 +12,20 @@ $search = isset($_GET['search']) ? sanitizeInput($_GET['search']) : '';
 $pdo = getDatabaseConnection();
 
 $query = "
-    SELECT h.*
+    SELECT DISTINCT h.*
     FROM haircuts h
-    WHERE 1=1
 ";
 
 $params = [];
 
+// Primary filter: Face Shape mapping via haircut_recommendations
 if ($faceShape) {
-    // For now, we'll get all haircuts and filter by face shape compatibility in PHP
-    // In the future, this could be enhanced with a proper face shape relationship table
+    $query .= "\n    INNER JOIN haircut_recommendations hr ON hr.haircut_id = h.id\n    INNER JOIN face_shapes fs ON fs.id = hr.face_shape_id AND LOWER(fs.name) = LOWER(?)\n";
+    $params[] = $faceShape;
 }
+
+// Begin WHERE for additional optional filters
+$query .= "\n    WHERE 1=1\n";
 
 if ($hairType) {
     switch($hairType) {
@@ -65,7 +68,12 @@ $stmt->execute($params);
 $haircuts = $stmt->fetchAll();
 
 // Get filter options
-$faceShapes = ['oval', 'round', 'square', 'heart', 'diamond', 'oblong'];
+try {
+    $faceShapes = $pdo->query("SELECT name FROM face_shapes ORDER BY name")?->fetchAll(PDO::FETCH_COLUMN);
+    if (!$faceShapes) { $faceShapes = ['oval', 'round', 'square', 'heart', 'diamond', 'oblong']; }
+} catch (Throwable $e) {
+    $faceShapes = ['oval', 'round', 'square', 'heart', 'diamond', 'oblong'];
+}
 $hairTypes = ['straight', 'wavy', 'curly', 'coily'];
 $maintenanceLevels = ['low', 'medium', 'high'];
 $categories = ['classic', 'trendy', 'professional', 'casual', 'formal'];
@@ -104,17 +112,17 @@ startLayout('Browse Haircuts', 'browse-haircuts');
     }
     
     .clear-filters {
-        color: #667eea;
+        color: var(--primary-color);
         text-decoration: none;
         font-size: 14px;
         padding: 8px 15px;
         border-radius: 8px;
-        border: 1px solid #667eea;
+        border: 1px solid var(--primary-color);
         transition: all 0.2s ease;
     }
     
     .clear-filters:hover {
-        background: #667eea;
+        background: var(--primary-color);
         color: white;
         text-decoration: none;
     }
@@ -150,8 +158,8 @@ startLayout('Browse Haircuts', 'browse-haircuts');
     .filter-group select:focus,
     .filter-group input:focus {
         outline: none;
-        border-color: #667eea;
-        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.15);
     }
     
     .filter-actions {
@@ -175,13 +183,13 @@ startLayout('Browse Haircuts', 'browse-haircuts');
     }
     
     .btn-primary {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: var(--primary-gradient);
         color: white;
     }
     
     .btn-primary:hover {
         transform: translateY(-2px);
-        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+        box-shadow: 0 8px 25px rgba(14, 165, 233, 0.3);
     }
     
     .btn-outline {
@@ -224,9 +232,9 @@ startLayout('Browse Haircuts', 'browse-haircuts');
     
     .view-btn.active,
     .view-btn:hover {
-        background: #667eea;
+        background: var(--primary-color);
         color: white;
-        border-color: #667eea;
+        border-color: var(--primary-color);
     }
     
     .haircuts-grid {
@@ -346,7 +354,7 @@ startLayout('Browse Haircuts', 'browse-haircuts');
     }
     
     .haircut-price {
-        background: #667eea;
+        background: var(--primary-color);
         color: white;
         padding: 4px 8px;
         border-radius: 6px;
@@ -460,20 +468,20 @@ startLayout('Browse Haircuts', 'browse-haircuts');
                 <i class="fas fa-filter"></i>
                 Filter Haircuts
             </h3>
-            <a href="browse-haircuts.php" class="clear-filters">
+            <a href="browse-haircuts_new.php" class="clear-filters">
                 <i class="fas fa-times"></i>
                 Clear All Filters
             </a>
         </div>
         
-        <form method="GET" action="browse-haircuts.php">
+    <form method="GET" action="browse-haircuts_new.php">
             <div class="filters-grid">
                 <div class="filter-group">
                     <label for="face_shape">Face Shape</label>
                     <select name="face_shape" id="face_shape">
                         <option value="">All Face Shapes</option>
                         <?php foreach ($faceShapes as $shape): ?>
-                            <option value="<?php echo $shape; ?>" <?php echo $faceShape === $shape ? 'selected' : ''; ?>>
+                            <option value="<?php echo $shape; ?>" <?php echo strtolower($faceShape) === strtolower($shape) ? 'selected' : ''; ?>>
                                 <?php echo ucfirst($shape); ?>
                             </option>
                         <?php endforeach; ?>
@@ -527,7 +535,7 @@ startLayout('Browse Haircuts', 'browse-haircuts');
                     <i class="fas fa-search"></i>
                     Apply Filters
                 </button>
-                <a href="browse-haircuts.php" class="btn btn-outline">
+                <a href="browse-haircuts_new.php" class="btn btn-outline">
                     <i class="fas fa-refresh"></i>
                     Reset
                 </a>
@@ -541,10 +549,10 @@ startLayout('Browse Haircuts', 'browse-haircuts');
             <strong><?php echo count($haircuts); ?></strong> haircuts found
         </div>
         <div class="view-toggle">
-            <button class="view-btn active" onclick="setGridView('grid')">
+            <button class="view-btn active" onclick="setGridView('grid', this)">
                 <i class="fas fa-th"></i>
             </button>
-            <button class="view-btn" onclick="setGridView('list')">
+            <button class="view-btn" onclick="setGridView('list', this)">
                 <i class="fas fa-list"></i>
             </button>
         </div>
@@ -556,7 +564,7 @@ startLayout('Browse Haircuts', 'browse-haircuts');
             <i class="fas fa-search"></i>
             <h3>No haircuts found</h3>
             <p>Try adjusting your filters or search terms to find more results.</p>
-            <a href="browse-haircuts.php" class="btn btn-primary">
+            <a href="browse-haircuts_new.php" class="btn btn-primary">
                 <i class="fas fa-refresh"></i> Show All Haircuts
             </a>
         </div>
@@ -627,12 +635,12 @@ startLayout('Browse Haircuts', 'browse-haircuts');
 </div>
 
 <script>
-    function setGridView(view) {
+    function setGridView(view, btn) {
         const grid = document.getElementById('haircutsGrid');
         const buttons = document.querySelectorAll('.view-btn');
         
         buttons.forEach(btn => btn.classList.remove('active'));
-        event.target.classList.add('active');
+        if (btn) { btn.classList.add('active'); }
         
         if (view === 'list') {
             grid.style.gridTemplateColumns = '1fr';

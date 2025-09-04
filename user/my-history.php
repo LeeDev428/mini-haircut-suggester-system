@@ -274,7 +274,7 @@ $quizHistory = $stmt->fetchAll();
     .quiz-icon {
         width: 50px;
         height: 50px;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: var(--primary-gradient);
         border-radius: 12px;
         display: flex;
         align-items: center;
@@ -364,7 +364,7 @@ $quizHistory = $stmt->fetchAll();
                     <i class="fas fa-calendar-alt"></i>
                     Appointment History
                 </h3>
-                <span class="section-count" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #fff; border: none;"><?php echo count($appointments); ?></span>
+                <span class="section-count" style="background: var(--primary-gradient); color: #fff; border: none;"><?php echo count($appointments); ?></span>
             </div>
             
             <?php if (empty($appointments)): ?>
@@ -382,7 +382,7 @@ $quizHistory = $stmt->fetchAll();
                     <?php foreach ($appointments as $appointment): ?>
                         <div class="history-item">
                             <div class="appointment-item">
-                                <div class="appointment-icon" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #fff; border: none;">
+                                <div class="appointment-icon" style="background: var(--primary-gradient); color: #fff; border: none;">
                                     <i class="fas fa-cut" ></i>
                                 </div>
                                 <div class="appointment-details">
@@ -417,7 +417,7 @@ $quizHistory = $stmt->fetchAll();
                     <i class="fas fa-heart"></i>
                     Saved Haircuts
                 </h3>
-                <span class="section-count" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #fff; border: none;"><?php echo count($savedHaircuts); ?></span>
+                <span class="section-count" style="background: var(--primary-gradient); color: #fff; border: none;"><?php echo count($savedHaircuts); ?></span>
             </div>
             
             <?php if (empty($savedHaircuts)): ?>
@@ -603,7 +603,7 @@ $quizHistory = $stmt->fetchAll();
 </div>
 
 <script>
-function showTab(tabName) {
+function showTab(tabName, btn) {
     // Hide all tab contents
     document.querySelectorAll('.tab-content').forEach(content => {
         content.classList.remove('active');
@@ -618,7 +618,7 @@ function showTab(tabName) {
     document.getElementById(tabName).classList.add('active');
     
     // Add active class to clicked button
-    event.target.classList.add('active');
+    if (btn) { btn.classList.add('active'); }
 }
 </script>
 

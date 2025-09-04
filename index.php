@@ -15,7 +15,12 @@
     <nav class="navbar">
         <div class="nav-container">
             <div class="nav-logo">
-                <h2><i class="fas fa-cut"></i> HairCut Suggester</h2>
+                <a href="#home" aria-label="GAÑO'S Barbershop Home" class="brand-link">
+                    <span class="brand-logo-wrap">
+                        <img src="assets/images/logo.png" alt="GAÑO'S Barbershop logo" class="brand-logo" />
+                    </span>
+                    <span class="brand-title">GAÑO'S Barbershop</span>
+                </a>
             </div>
             <div class="nav-links">
                 <a href="#home">Home</a>
@@ -81,7 +86,7 @@
             
             <div class="hero-image">
                 <div class="image-container">
-                    <img src="assets/images/hero-haircut.jpg" alt="Beautiful woman with perfect hairstyle" />
+                    <img src="assets/images/gano_logo.jpg" alt="GAÑO'S Barbershop logo" class="hero-logo" />
                     <div class="image-overlay">
                         <div class="style-badge">
                             <i class="fas fa-star"></i>

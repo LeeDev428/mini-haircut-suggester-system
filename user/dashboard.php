@@ -98,7 +98,7 @@ startLayout('Dashboard', 'dashboard');
         left: 0;
         right: 0;
         height: 4px;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: var(--primary-gradient);
     }
     
     .stat-header {
@@ -119,7 +119,7 @@ startLayout('Dashboard', 'dashboard');
         color: white;
     }
     
-    .stat-icon.appointments { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+    .stat-icon.appointments { background: var(--primary-gradient); }
     .stat-icon.saved { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
     .stat-icon.quizzes { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
     .stat-icon.rating { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); }
@@ -195,7 +195,7 @@ startLayout('Dashboard', 'dashboard');
     }
     
     .appointment-date {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: var(--primary-gradient);
         color: white;
         padding: 8px 12px;
         border-radius: 10px;
@@ -310,16 +310,16 @@ startLayout('Dashboard', 'dashboard');
     }
     
     .quick-action:hover {
-        border-color: #667eea;
+        border-color: var(--primary-color);
         transform: translateY(-5px);
-        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.15);
-        color: #667eea;
+        box-shadow: 0 8px 25px rgba(14, 165, 233, 0.15);
+        color: var(--primary-color);
         text-decoration: none;
     }
     
     .quick-action i {
         font-size: 36px;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: var(--primary-gradient);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         background-clip: text;
@@ -428,14 +428,14 @@ startLayout('Dashboard', 'dashboard');
                     <i class="fas fa-calendar"></i>
                     Recent Appointments
                 </h3>
-                <a href="my-history.php" style="color: #667eea; text-decoration: none; font-size: 14px;">View All</a>
+                <a href="my-history.php" style="color: var(--primary-color); text-decoration: none; font-size: 14px;">View All</a>
             </div>
             
             <?php if (empty($recent_appointments)): ?>
                 <div class="no-data">
                     <i class="fas fa-calendar-times"></i>
                     <p>No appointments yet</p>
-                    <a href="booking.php" style="color: #667eea; text-decoration: none;">Book your first appointment</a>
+                    <a href="booking.php" style="color: var(--primary-color); text-decoration: none;">Book your first appointment</a>
                 </div>
             <?php else: ?>
                 <?php foreach ($recent_appointments as $appointment): ?>
@@ -466,14 +466,14 @@ startLayout('Dashboard', 'dashboard');
                     <i class="fas fa-heart"></i>
                     Saved Haircuts
                 </h3>
-                <a href="browse-haircuts.php" style="color: #667eea; text-decoration: none; font-size: 14px;">Browse More</a>
+                <a href="browse-haircuts.php" style="color: var(--primary-color); text-decoration: none; font-size: 14px;">Browse More</a>
             </div>
             
             <?php if (empty($saved_haircuts)): ?>
                 <div class="no-data">
                     <i class="fas fa-heart"></i>
                     <p>No saved haircuts yet</p>
-                    <a href="browse-haircuts.php" style="color: #667eea; text-decoration: none;">Discover styles to save</a>
+                    <a href="browse-haircuts.php" style="color: var(--primary-color); text-decoration: none;">Discover styles to save</a>
                 </div>
             <?php else: ?>
                 <div class="haircut-grid">

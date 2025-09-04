@@ -13,7 +13,7 @@ $pdo = getDatabaseConnection();
 $user_id = $_SESSION['user']['id'];
 
 $query = "
-    SELECT h.*,
+    SELECT DISTINCT h.*,
            (SELECT COUNT(*) FROM user_saved_haircuts ush WHERE ush.haircut_id = h.id AND ush.user_id = ?) as is_saved
     FROM haircuts h
     WHERE 1=1
@@ -21,9 +21,29 @@ $query = "
 
 $params = [$user_id];
 
+// Primary filter: Face Shape -> use direct haircut compatibility columns
 if ($faceShape) {
-    // For now, we'll get all haircuts and filter by face shape compatibility in PHP
-    // In the future, this could be enhanced with a proper face shape relationship table
+    switch(strtolower($faceShape)) {
+        case 'round':
+            $query .= " AND h.suitable_for_round = 1";
+            break;
+        case 'oval':
+            $query .= " AND h.suitable_for_oval = 1";
+            break;
+        case 'square':
+            $query .= " AND h.suitable_for_square = 1";
+            break;
+        case 'heart':
+            $query .= " AND h.suitable_for_heart = 1";
+            break;
+        case 'oblong':
+            $query .= " AND h.suitable_for_oblong = 1";
+            break;
+        case 'diamond':
+            // Diamond face shape doesn't have a specific column, so we'll use oblong as similar
+            $query .= " AND h.suitable_for_oblong = 1";
+            break;
+    }
 }
 
 if ($hairType) {
@@ -67,10 +87,26 @@ $stmt->execute($params);
 $haircuts = $stmt->fetchAll();
 
 // Get filter options
-$faceShapes = ['oval', 'round', 'square', 'heart', 'diamond', 'oblong'];
+// Load face shapes dynamically from DB to stay in sync with schema
+try {
+    $faceShapes = $pdo->query("SELECT name FROM face_shapes ORDER BY name")?->fetchAll(PDO::FETCH_COLUMN);
+    if (!$faceShapes) { $faceShapes = ['oval', 'round', 'square', 'heart', 'diamond', 'oblong']; }
+} catch (Throwable $e) {
+    // Fallback to a static list if table isn't available
+    $faceShapes = ['oval', 'round', 'square', 'heart', 'diamond', 'oblong'];
+}
+
+// Get actual style categories from the database
+try {
+    $categories = $pdo->query("SELECT DISTINCT style_category FROM haircuts WHERE style_category IS NOT NULL AND style_category != '' ORDER BY style_category")?->fetchAll(PDO::FETCH_COLUMN);
+    if (!$categories) { $categories = ['classic', 'modern', 'trendy', 'casual', 'formal']; }
+} catch (Throwable $e) {
+    // Fallback to a static list if query fails
+    $categories = ['classic', 'modern', 'trendy', 'casual', 'formal'];
+}
+
 $hairTypes = ['straight', 'wavy', 'curly', 'coily'];
 $maintenanceLevels = ['low', 'medium', 'high'];
-$categories = ['classic', 'trendy', 'professional', 'casual', 'formal'];
 
 startLayout('Browse Haircuts', 'browse-haircuts');
 ?>
@@ -106,17 +142,17 @@ startLayout('Browse Haircuts', 'browse-haircuts');
     }
     
     .clear-filters {
-        color: #667eea;
+        color: var(--primary-color);
         text-decoration: none;
         font-size: 14px;
         padding: 8px 15px;
         border-radius: 8px;
-        border: 1px solid #667eea;
+        border: 1px solid var(--primary-color);
         transition: all 0.2s ease;
     }
     
     .clear-filters:hover {
-        background: #667eea;
+        background: var(--primary-color);
         color: white;
         text-decoration: none;
     }
@@ -152,8 +188,8 @@ startLayout('Browse Haircuts', 'browse-haircuts');
     .filter-group select:focus,
     .filter-group input:focus {
         outline: none;
-        border-color: #667eea;
-        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.15);
     }
     
     .filter-actions {
@@ -177,13 +213,13 @@ startLayout('Browse Haircuts', 'browse-haircuts');
     }
     
     .btn-primary {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: var(--primary-gradient);
         color: white;
     }
     
     .btn-primary:hover {
         transform: translateY(-2px);
-        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+        box-shadow: 0 8px 25px rgba(14, 165, 233, 0.3);
     }
     
     .btn-outline {
@@ -226,9 +262,9 @@ startLayout('Browse Haircuts', 'browse-haircuts');
     
     .view-btn.active,
     .view-btn:hover {
-        background: #667eea;
+        background: var(--primary-color);
         color: white;
-        border-color: #667eea;
+        border-color: var(--primary-color);
     }
     
     .haircuts-grid {
@@ -348,7 +384,7 @@ startLayout('Browse Haircuts', 'browse-haircuts');
     }
     
     .haircut-price {
-        background: #667eea;
+        background: var(--primary-color);
         color: white;
         padding: 4px 8px;
         border-radius: 6px;
@@ -475,7 +511,7 @@ startLayout('Browse Haircuts', 'browse-haircuts');
                     <select name="face_shape" id="face_shape">
                         <option value="">All Face Shapes</option>
                         <?php foreach ($faceShapes as $shape): ?>
-                            <option value="<?php echo $shape; ?>" <?php echo $faceShape === $shape ? 'selected' : ''; ?>>
+                            <option value="<?php echo $shape; ?>" <?php echo strtolower($faceShape) === strtolower($shape) ? 'selected' : ''; ?>>
                                 <?php echo ucfirst($shape); ?>
                             </option>
                         <?php endforeach; ?>
@@ -543,10 +579,10 @@ startLayout('Browse Haircuts', 'browse-haircuts');
             <strong><?php echo count($haircuts); ?></strong> haircuts found
         </div>
         <div class="view-toggle">
-            <button class="view-btn active" onclick="setGridView('grid')">
+            <button class="view-btn active" onclick="setGridView('grid', this)">
                 <i class="fas fa-th"></i>
             </button>
-            <button class="view-btn" onclick="setGridView('list')">
+            <button class="view-btn" onclick="setGridView('list', this)">
                 <i class="fas fa-list"></i>
             </button>
         </div>
@@ -614,12 +650,12 @@ startLayout('Browse Haircuts', 'browse-haircuts');
 </div>
 
 <script>
-    function setGridView(view) {
+    function setGridView(view, btn) {
         const grid = document.getElementById('haircutsGrid');
         const buttons = document.querySelectorAll('.view-btn');
         
         buttons.forEach(btn => btn.classList.remove('active'));
-        event.target.classList.add('active');
+        if (btn) { btn.classList.add('active'); }
         
         if (view === 'list') {
             grid.style.gridTemplateColumns = '1fr';

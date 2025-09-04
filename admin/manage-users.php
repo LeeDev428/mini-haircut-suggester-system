@@ -301,8 +301,8 @@ function exportUsers() {
 }
 
 // Close dropdown when clicking outside
-window.onclick = function(event) {
-    if (!event.target.matches('.btn')) {
+window.onclick = function(e) {
+    if (!e.target.matches('.btn')) {
         document.querySelectorAll('.dropdown-content').forEach(dropdown => {
             dropdown.classList.remove('show');
         });

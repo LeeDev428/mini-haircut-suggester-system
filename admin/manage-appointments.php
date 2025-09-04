@@ -342,7 +342,7 @@ function generateCalendar(year, month) {
         // Add click handler
         dayElement.addEventListener('click', () => {
             if (!dayElement.classList.contains('disabled')) {
-                selectDate(dateStr, date);
+                selectDate(dateStr, date, dayElement);
             }
         });
         
@@ -350,14 +350,14 @@ function generateCalendar(year, month) {
     }
 }
 
-function selectDate(dateStr, dateObj) {
+function selectDate(dateStr, dateObj, el) {
     // Remove previous selection
     document.querySelectorAll('.calendar-day.selected').forEach(day => {
         day.classList.remove('selected');
     });
     
     // Add selection to clicked day
-    event.target.closest('.calendar-day').classList.add('selected');
+    if (el) { el.classList.add('selected'); }
     
     // Update appointments list
     const appointments = appointmentsByDate[dateStr] || [];

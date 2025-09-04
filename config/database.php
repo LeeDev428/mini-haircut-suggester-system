@@ -47,28 +47,16 @@ function isAdmin() {
     if (!isset($_SESSION['user'])) {
         return false;
     }
-    
-    // Check if user is admin using the is_admin column from database
-    $pdo = getDatabaseConnection();
-    $stmt = $pdo->prepare("SELECT is_admin FROM users WHERE id = ?");
-    $stmt->execute([$_SESSION['user']['id']]);
-    $user = $stmt->fetch();
-    
-    return $user && $user['is_admin'];
+    // Prefer session role check; users table uses a 'role' enum (admin|user)
+    return isset($_SESSION['user']['role']) && $_SESSION['user']['role'] === 'admin';
 }
 
 function isUser() {
     if (!isset($_SESSION['user'])) {
         return false;
     }
-    
-    // Check if user is not an admin (regular user)
-    $pdo = getDatabaseConnection();
-    $stmt = $pdo->prepare("SELECT is_admin FROM users WHERE id = ?");
-    $stmt->execute([$_SESSION['user']['id']]);
-    $user = $stmt->fetch();
-    
-    return $user && !$user['is_admin'];
+    // Regular user role
+    return isset($_SESSION['user']['role']) && $_SESSION['user']['role'] === 'user';
 }
 
 function requireLogin() {

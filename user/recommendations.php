@@ -1,54 +1,63 @@
 <?php
 require_once 'includes/layout.php';
+require_once '../config/recommendation_engine.php';
 
 $userId = $_SESSION['user']['id'];
 $pdo = getDatabaseConnection();
 
-// Get user's face shape and recommendations
+// Get user's latest quiz info (face shape and preference IDs)
 $stmt = $pdo->prepare("
     SELECT fs.name as face_shape, fs.id as face_shape_id,
+           qr.hair_type_id, qr.hair_thickness_id, qr.lifestyle_preference_id, qr.age_group_id,
+           qr.current_hair_length, qr.budget_range,
            COUNT(qr.id) as quiz_count,
            MAX(qr.created_at) as last_quiz
     FROM users u
     LEFT JOIN user_quiz_results qr ON u.id = qr.user_id
     LEFT JOIN face_shapes fs ON qr.face_shape_id = fs.id
     WHERE u.id = ?
-    GROUP BY u.id, fs.id, fs.name
+    GROUP BY u.id, fs.id, fs.name, qr.hair_type_id, qr.hair_thickness_id, qr.lifestyle_preference_id, qr.age_group_id, qr.current_hair_length, qr.budget_range
     ORDER BY MAX(qr.created_at) DESC
     LIMIT 1
 ");
 $stmt->execute([$userId]);
 $userInfo = $stmt->fetch();
 
-// Get personalized recommendations
+// Fetch user gender for recommendation engine
+$gender = null;
+$stmt = $pdo->prepare('SELECT gender FROM users WHERE id = ?');
+$stmt->execute([$userId]);
+$userRow = $stmt->fetch();
+if ($userRow) { $gender = $userRow['gender']; }
+
+// Get personalized recommendations using the engine
 $recommendations = [];
-if ($userInfo && $userInfo['face_shape']) {
-    $stmt = $pdo->prepare("
-        SELECT h.*, hr.recommendation_score
-        FROM haircut_recommendations hr
-        JOIN haircuts h ON hr.haircut_id = h.id
-        WHERE hr.face_shape_id = ? AND h.is_active = 1
-        ORDER BY hr.recommendation_score DESC, h.popularity_score DESC
-        LIMIT 12
-    ");
-    $stmt->execute([$userInfo['face_shape_id']]);
-    $recommendations = $stmt->fetchAll();
+if ($userInfo && $userInfo['face_shape_id']) {
+    $engine = new HaircutRecommendationEngine();
+    $recommendations = $engine->getRecommendations(
+        (int)$userInfo['face_shape_id'],
+        $userInfo['hair_type_id'] ? (int)$userInfo['hair_type_id'] : null,
+        $userInfo['hair_thickness_id'] ? (int)$userInfo['hair_thickness_id'] : null,
+        $userInfo['lifestyle_preference_id'] ? (int)$userInfo['lifestyle_preference_id'] : null,
+        $userInfo['age_group_id'] ? (int)$userInfo['age_group_id'] : null,
+        $gender,
+        $userInfo['current_hair_length'] ?? null,
+        $userInfo['budget_range'] ?? null
+    );
 }
 
-// Get trending haircuts for the user's face shape
+// Get trending haircuts for the user's face shape (by trend_score)
 $trendingHaircuts = [];
-if ($userInfo && $userInfo['face_shape']) {
+if ($userInfo && $userInfo['face_shape_id']) {
     $stmt = $pdo->prepare("
-        SELECT h.*, GROUP_CONCAT(fs.name) as suitable_faces
-        FROM haircuts h
-        LEFT JOIN haircut_face_shapes hfs ON h.id = hfs.haircut_id
-        LEFT JOIN face_shapes fs ON hfs.face_shape_id = fs.id
-        WHERE h.is_active = 1 AND fs.name = ?
-        GROUP BY h.id
-        ORDER BY h.popularity_score DESC
+        SELECT h.*
+        FROM haircut_recommendations hr
+        JOIN haircuts h ON hr.haircut_id = h.id
+        WHERE hr.face_shape_id = ?
+        ORDER BY h.trend_score DESC
         LIMIT 6
     ");
-    $stmt->execute([$userInfo['face_shape']]);
+    $stmt->execute([$userInfo['face_shape_id']]);
     $trendingHaircuts = $stmt->fetchAll();
 }
 ?>
@@ -60,7 +69,7 @@ if ($userInfo && $userInfo['face_shape']) {
     }
     
     .face-shape-info {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: var(--primary-gradient);
         color: white;
         padding: 25px;
         border-radius: 15px;
@@ -396,33 +405,30 @@ if ($userInfo && $userInfo['face_shape']) {
                                         </div>
                                     <?php endif; ?>
                                     <div class="recommendation-score">
-                                        <?php echo round($rec['score']); ?>% Match
+                                        <?php echo max(0, min(100, (int)round($rec['final_score']))); ?>% Match
                                     </div>
                                 </div>
                                 
                                 <div class="recommendation-content">
                                     <h3 class="recommendation-title"><?php echo htmlspecialchars($rec['name']); ?></h3>
-                                    <p class="recommendation-reason"><?php echo htmlspecialchars($rec['reason']); ?></p>
+                                    <p class="recommendation-reason"><?php echo htmlspecialchars($rec['reason'] ?? 'Recommended for your face shape and preferences'); ?></p>
                                     
                                     <div class="recommendation-tags">
                                         <span class="recommendation-tag maintenance">
                                             <?php echo ucfirst($rec['maintenance_level']); ?> Maintenance
                                         </span>
-                                        <?php if ($rec['style_category']): ?>
+                                        <?php if (!empty($rec['style_category'])): ?>
                                             <span class="recommendation-tag">
                                                 <?php echo ucfirst($rec['style_category']); ?>
                                             </span>
                                         <?php endif; ?>
-                                        <span class="recommendation-tag">
-                                            <?php echo $rec['popularity_score']; ?>% Popular
-                                        </span>
                                     </div>
                                     
                                     <div class="recommendation-actions">
-                                        <button class="action-btn primary" onclick="viewDetails(<?php echo $rec['haircut_id']; ?>)">
+                                        <button class="action-btn primary" onclick="viewDetails(<?php echo (int)($rec['id'] ?? $rec['haircut_id']); ?>)">
                                             <i class="fas fa-eye"></i> View Details
                                         </button>
-                                        <button class="action-btn outline" onclick="saveHaircut(<?php echo $rec['haircut_id']; ?>, this)">
+                                        <button class="action-btn outline" onclick="saveHaircut(<?php echo (int)($rec['id'] ?? $rec['haircut_id']); ?>, this)">
                                             <i class="fas fa-heart"></i> Save
                                         </button>
                                     </div>
@@ -452,7 +458,7 @@ if ($userInfo && $userInfo['face_shape']) {
                                         </div>
                                     <?php endif; ?>
                                     <div class="recommendation-score">
-                                        <?php echo $haircut['popularity_score']; ?>% Popular
+                                        <?php echo (int)$haircut['trend_score']; ?> Trend
                                     </div>
                                 </div>
                                 
@@ -464,7 +470,7 @@ if ($userInfo && $userInfo['face_shape']) {
                                         <span class="recommendation-tag maintenance">
                                             <?php echo ucfirst($haircut['maintenance_level']); ?> Maintenance
                                         </span>
-                                        <?php if ($haircut['style_category']): ?>
+                                        <?php if (!empty($haircut['style_category'])): ?>
                                             <span class="recommendation-tag">
                                                 <?php echo ucfirst($haircut['style_category']); ?>
                                             </span>

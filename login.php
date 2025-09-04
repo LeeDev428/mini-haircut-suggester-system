@@ -100,10 +100,7 @@ if ($_POST) {
                             <span>Connect with style experts</span>
                         </div>
                     </div>
-                    <div class="auth-testimonial">
-                        <p>"I love how easy it is to find new styles that work with my face shape and lifestyle!"</p>
-                        <span>- Michael R.</span>
-                    </div>
+                    
                 </div>
             </div>
 
@@ -140,7 +137,7 @@ if ($_POST) {
                         <div class="password-input">
                             <input type="password" id="password" name="password" required 
                                    placeholder="Enter your password">
-                            <button type="button" class="password-toggle" onclick="togglePassword('password')">
+                            <button type="button" class="toggle-password password-toggle" aria-label="Toggle password visibility">
                                 <i class="fas fa-eye"></i>
                             </button>
                         </div>
@@ -152,7 +149,6 @@ if ($_POST) {
                             <span class="checkmark"></span>
                             Remember me
                         </label>
-                        <a href="forgot-password.php" class="forgot-link">Forgot password?</a>
                     </div>
 
                     <button type="submit" class="btn btn-primary btn-full">
@@ -160,35 +156,13 @@ if ($_POST) {
                         Sign In
                     </button>
 
-                    <div class="auth-divider">
-                        <span>or</span>
-                    </div>
-
-                    <div class="social-login">
-                        <button type="button" class="btn btn-social btn-google">
-                            <i class="fab fa-google"></i>
-                            Continue with Google
-                        </button>
-                        <button type="button" class="btn btn-social btn-facebook">
-                            <i class="fab fa-facebook"></i>
-                            Continue with Facebook
-                        </button>
-                    </div>
+                    
 
                     <div class="auth-links">
                         <p>Don't have an account? <a href="register.php">Create one here</a></p>
                         <p><a href="index.php"><i class="fas fa-arrow-left"></i> Back to Home</a></p>
                     </div>
-
-                    <div class="demo-accounts">
-                        <h4><i class="fas fa-info-circle"></i> Demo Accounts</h4>
-                        <div class="demo-account">
-                            <strong>Admin:</strong> admin / admin123
-                        </div>
-                        <div class="demo-account">
-                            <strong>User:</strong> Register a new account or use any created account
-                        </div>
-                    </div>
+                    
                 </form>
             </div>
         </div>

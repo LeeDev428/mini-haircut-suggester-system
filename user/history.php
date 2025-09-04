@@ -6,9 +6,10 @@ $pdo = getDatabaseConnection();
 
 // Get quiz history
 $stmt = $pdo->prepare("
-    SELECT qr.*, u.first_name, u.last_name
+    SELECT qr.*, u.first_name, u.last_name, fs.name AS face_shape_name
     FROM user_quiz_results qr
     JOIN users u ON qr.user_id = u.id
+    LEFT JOIN face_shapes fs ON qr.face_shape_id = fs.id
     WHERE qr.user_id = ?
     ORDER BY qr.created_at DESC
 ");
@@ -33,7 +34,7 @@ $stmt = $pdo->prepare("
     FROM user_haircut_history uhh
     JOIN haircuts h ON uhh.haircut_id = h.id
     WHERE uhh.user_id = ?
-    ORDER BY uhh.tried_at DESC
+    ORDER BY uhh.created_at DESC
     LIMIT 10
 ");
 $stmt->execute([$userId]);
@@ -230,7 +231,7 @@ $stats = $stmt->fetch();
         }
         
         .quiz-icon {
-            background: linear-gradient(135deg, #667eea, #764ba2);
+            background: var(--primary-gradient);
         }
         
         .save-icon {
@@ -463,13 +464,13 @@ $stats = $stmt->fetch();
             </div>
             
             <div class="history-tabs">
-                <button class="tab-button active" onclick="switchTab('quiz-history')">
+                <button class="tab-button active" onclick="switchTab('quiz-history', this)">
                     <i class="fas fa-user-check"></i> Quiz History
                 </button>
-                <button class="tab-button" onclick="switchTab('saved-history')">
+                <button class="tab-button" onclick="switchTab('saved-history', this)">
                     <i class="fas fa-heart"></i> Saved Haircuts
                 </button>
-                <button class="tab-button" onclick="switchTab('recommendation-history')">
+                <button class="tab-button" onclick="switchTab('recommendation-history', this)">
                     <i class="fas fa-magic"></i> Recommendations
                 </button>
             </div>
@@ -499,21 +500,21 @@ $stats = $stmt->fetch();
                                     </div>
                                     
                                     <div class="history-content">
-                                        <h3 class="history-title">Face Shape Quiz Result: <?php echo ucfirst($quiz['face_shape']); ?></h3>
+                                        <h3 class="history-title">Face Shape Quiz Result: <?php echo ucfirst($quiz['face_shape_name'] ?? ''); ?></h3>
                                         <p class="history-description">Completed face shape analysis and received personalized recommendations</p>
                                         
                                         <div class="history-meta">
                                             <span class="history-date">
                                                 <i class="fas fa-clock"></i>
-                                                <?php echo date('M j, Y \a\t g:i A', strtotime($quiz['taken_at'])); ?>
+                                                <?php echo date('M j, Y \a\t g:i A', strtotime($quiz['created_at'])); ?>
                                             </span>
-                                            <span class="history-badge"><?php echo ucfirst($quiz['face_shape']); ?> Face</span>
+                                            <span class="history-badge"><?php echo ucfirst($quiz['face_shape_name'] ?? ''); ?> Face</span>
                                         </div>
                                         
                                         <div class="quiz-details" style="display: none;" id="quiz-<?php echo $quiz['id']; ?>">
                                             <div class="quiz-answers">
                                                 <?php 
-                                                $answers = json_decode($quiz['answers'], true);
+                                                $answers = json_decode($quiz['quiz_score'] ?? '[]', true);
                                                 if ($answers):
                                                     foreach ($answers as $key => $value):
                                                 ?>
@@ -530,10 +531,10 @@ $stats = $stmt->fetch();
                                     </div>
                                     
                                     <div class="history-actions">
-                                        <button class="action-btn outline" onclick="toggleQuizDetails(<?php echo $quiz['id']; ?>)">
+                                        <button class="action-btn outline" onclick="toggleQuizDetails(<?php echo $quiz['id']; ?>, this)">
                                             <i class="fas fa-eye"></i> View Details
                                         </button>
-                                        <button class="action-btn primary" onclick="viewRecommendations('<?php echo $quiz['face_shape']; ?>')">
+                                        <button class="action-btn primary" onclick="viewRecommendations('<?php echo $quiz['face_shape_name'] ?? ''; ?>')">
                                             <i class="fas fa-magic"></i> Get Recommendations
                                         </button>
                                     </div>
@@ -637,14 +638,16 @@ $stats = $stmt->fetch();
                                     
                                     <div class="history-content">
                                         <h3 class="history-title"><?php echo htmlspecialchars($rec['name']); ?></h3>
-                                        <p class="history-description"><?php echo htmlspecialchars($rec['reason']); ?></p>
+                                        <p class="history-description"><?php echo htmlspecialchars(substr($rec['description'], 0, 100)) . '...'; ?></p>
                                         
                                         <div class="history-meta">
                                             <span class="history-date">
                                                 <i class="fas fa-clock"></i>
                                                 <?php echo date('M j, Y', strtotime($rec['created_at'])); ?>
                                             </span>
-                                            <span class="history-badge"><?php echo round($rec['score']); ?>% Match</span>
+                                            <?php if (!empty($rec['rating'])): ?>
+                                                <span class="history-badge">Rating <?php echo (int)$rec['rating']; ?>/5</span>
+                                            <?php endif; ?>
                                         </div>
                                     </div>
                                     
@@ -674,7 +677,7 @@ $stats = $stmt->fetch();
     <script src="../assets/js/main.js"></script>
     <script src="../assets/js/dashboard.js"></script>
     <script>
-        function switchTab(tabId) {
+        function switchTab(tabId, btn) {
             // Hide all tab contents
             document.querySelectorAll('.tab-content').forEach(tab => {
                 tab.classList.remove('active');
@@ -689,12 +692,12 @@ $stats = $stmt->fetch();
             document.getElementById(tabId).classList.add('active');
             
             // Add active class to clicked button
-            event.target.classList.add('active');
+            if (btn) { btn.classList.add('active'); }
         }
         
-        function toggleQuizDetails(quizId) {
+        function toggleQuizDetails(quizId, btn) {
             const details = document.getElementById(`quiz-${quizId}`);
-            const button = event.target;
+            const button = btn;
             
             if (details.style.display === 'none' || !details.style.display) {
                 details.style.display = 'block';

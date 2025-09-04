@@ -1,5 +1,6 @@
 <?php
 require_once '../config/database.php';
+require_once '../config/recommendation_engine.php';
 
 // Enable CORS for AJAX requests
 header('Content-Type: application/json');
@@ -32,7 +33,7 @@ if (!$data || !isset($data['face_shape']) || !isset($data['answers'])) {
 }
 
 $userId = $_SESSION['user']['id'];
-$faceShape = sanitizeInput($data['face_shape']);
+$faceShapeName = sanitizeInput($data['face_shape']);
 $answers = json_encode($data['answers']);
 
 try {
@@ -41,49 +42,80 @@ try {
     // Start transaction
     $pdo->beginTransaction();
     
-    // Insert quiz result
-    $stmt = $pdo->prepare("
-        INSERT INTO quiz_results (user_id, face_shape, answers, taken_at) 
-        VALUES (?, ?, ?, NOW())
-    ");
-    $stmt->execute([$userId, $faceShape, $answers]);
-    
-    $quizResultId = $pdo->lastInsertId();
-    
-    // Update user's face shape in users table
-    $stmt = $pdo->prepare("UPDATE users SET face_shape = ? WHERE id = ?");
-    $stmt->execute([$faceShape, $userId]);
-    
-    // Get recommendations based on face shape
-    $recommendations = getRecommendations($userId, $faceShape);
-    
-    // Save recommendations to database
-    $stmt = $pdo->prepare("
-        INSERT INTO recommendations (user_id, haircut_id, score, reason, created_at) 
-        VALUES (?, ?, ?, ?, NOW())
-        ON DUPLICATE KEY UPDATE score = VALUES(score), reason = VALUES(reason), created_at = NOW()
-    ");
-    
-    foreach ($recommendations as $rec) {
-        $stmt->execute([
-            $userId,
-            $rec['haircut_id'],
-            $rec['score'],
-            $rec['reason']
-        ]);
+    // Resolve face_shape_id from name (case-insensitive)
+    $stmt = $pdo->prepare("SELECT id, name FROM face_shapes WHERE LOWER(name) = LOWER(?) LIMIT 1");
+    $stmt->execute([$faceShapeName]);
+    $faceShape = $stmt->fetch();
+    if (!$faceShape) {
+        throw new Exception('Unknown face shape');
     }
+
+    // Optionally resolve other preference IDs from payload if present
+    $hairTypeId = isset($data['hair_type_id']) ? (int)$data['hair_type_id'] : null;
+    $hairThicknessId = isset($data['hair_thickness_id']) ? (int)$data['hair_thickness_id'] : null;
+    $lifestyleId = isset($data['lifestyle_preference_id']) ? (int)$data['lifestyle_preference_id'] : null;
+    $ageGroupId = isset($data['age_group_id']) ? (int)$data['age_group_id'] : null;
+    $currentLength = isset($data['current_hair_length']) ? sanitizeInput($data['current_hair_length']) : null;
+    $budgetRange = isset($data['budget_range']) ? sanitizeInput($data['budget_range']) : null;
+    $specialOccasions = !empty($data['special_occasions']);
+    $professionalEnv = !empty($data['professional_environment']);
+
+    // Insert into user_quiz_results table per schema
+    $stmt = $pdo->prepare("INSERT INTO user_quiz_results (
+            user_id, face_shape_id, hair_type_id, hair_thickness_id, lifestyle_preference_id, age_group_id,
+            current_hair_length, budget_range, special_occasions, professional_environment, quiz_score
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+    $stmt->execute([
+        $userId,
+        (int)$faceShape['id'],
+        $hairTypeId,
+        $hairThicknessId,
+        $lifestyleId,
+        $ageGroupId,
+        $currentLength,
+        $budgetRange,
+        $specialOccasions,
+        $professionalEnv,
+        $answers
+    ]);
+
+    $quizResultId = $pdo->lastInsertId();
+
+    // Generate recommendations using the engine with available IDs
+    $engine = new HaircutRecommendationEngine();
+    // For gender, attempt from session user if exists
+    $gender = $_SESSION['user']['gender'] ?? null;
+
+    $recs = $engine->getRecommendations(
+        (int)$faceShape['id'],
+        $hairTypeId,
+        $hairThicknessId,
+        $lifestyleId,
+        $ageGroupId,
+        $gender,
+        $currentLength,
+        $budgetRange
+    );
     
     // Commit transaction
     $pdo->commit();
     
-    // Update session data
-    $_SESSION['user']['face_shape'] = $faceShape;
+    // Update session data (store face shape name for UI convenience)
+    $_SESSION['user']['face_shape'] = $faceShape['name'];
     
     echo json_encode([
         'success' => true,
         'quiz_result_id' => $quizResultId,
-        'face_shape' => $faceShape,
-        'recommendations_count' => count($recommendations),
+        'face_shape' => $faceShape['name'],
+        'recommendations' => array_map(function($r) {
+            return [
+                'haircut_id' => $r['id'] ?? $r['haircut_id'] ?? null,
+                'name' => $r['name'] ?? null,
+                'final_score' => $r['final_score'] ?? null,
+                'reason' => $r['reason'] ?? null,
+                'image_url' => $r['image_url'] ?? null,
+            ];
+        }, $recs),
         'message' => 'Quiz results saved successfully'
     ]);
     

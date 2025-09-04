@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Toggle password visibility
     const toggleButtons = document.querySelectorAll('.toggle-password');
     toggleButtons.forEach(button => {
-        button.addEventListener('click', togglePasswordVisibility);
+        button.addEventListener('click', (e) => togglePasswordVisibility(e, button));
     });
 });
 
@@ -108,9 +108,11 @@ function checkPasswordMatch() {
     }
 }
 
-function togglePasswordVisibility(event) {
+function togglePasswordVisibility(event, button) {
     event.preventDefault();
-    const button = event.target.closest('.toggle-password');
+    if (!button) {
+        button = event.target.closest('.toggle-password');
+    }
     const input = button.previousElementSibling;
     const icon = button.querySelector('i');
     

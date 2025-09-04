@@ -10,7 +10,7 @@
 .sidebar,
 .admin-sidebar {
     width: 280px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: var(--secondary-gradient);
     color: white;
     position: fixed;
     height: 100vh;
@@ -20,9 +20,7 @@
     box-shadow: 4px 0 20px rgba(0, 0, 0, 0.1);
 }
 
-.admin-sidebar {
-    background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%);
-}
+.admin-sidebar { background: var(--secondary-gradient); }
 
 .sidebar-header {
     padding: 25px 20px;
@@ -267,7 +265,7 @@
     background: var(--primary-gradient);
 }
 
-.admin-stat-card.users .stat-icon { background: linear-gradient(135deg, #667eea, #764ba2); }
+.admin-stat-card.users .stat-icon { background: var(--primary-gradient); }
 .admin-stat-card.haircuts .stat-icon { background: linear-gradient(135deg, #f093fb, #f5576c); }
 .admin-stat-card.quizzes .stat-icon { background: linear-gradient(135deg, #4facfe, #00f2fe); }
 .admin-stat-card.saved .stat-icon { background: linear-gradient(135deg, #43e97b, #38f9d7); }
@@ -400,10 +398,7 @@
     font-weight: 500;
 }
 
-.trending-badge {
-    background: linear-gradient(135deg, #ff6b8a, #ff8aa6);
-    color: white;
-}
+.trending-badge { background: var(--primary-gradient); color: white; }
 
 .status-badge {
     padding: 4px 10px;
@@ -449,10 +444,7 @@
     color: white;
 }
 
-.action-btn.secondary {
-    background: linear-gradient(135deg, #667eea, #764ba2);
-    color: white;
-}
+.action-btn.secondary { background: var(--secondary-gradient); color: white; }
 
 .action-btn.accent {
     background: linear-gradient(135deg, #4facfe, #00f2fe);
