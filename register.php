@@ -235,16 +235,7 @@ if ($_POST) {
                         <span>or</span>
                     </div>
 
-                    <div class="social-login">
-                        <button type="button" class="btn btn-social btn-google">
-                            <i class="fab fa-google"></i>
-                            Continue with Google
-                        </button>
-                        <button type="button" class="btn btn-social btn-facebook">
-                            <i class="fab fa-facebook"></i>
-                            Continue with Facebook
-                        </button>
-                    </div>
+                  
 
                     <div class="auth-links">
                         <p>Already have an account? <a href="login.php">Log in here</a></p>

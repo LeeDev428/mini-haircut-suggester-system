@@ -166,7 +166,7 @@ startAdminLayout('Manage Users - Admin Panel', 'manage-users');
     renderAdminPageHeader(
         'Manage Users', 
         'View and manage all registered users',
-        '<button class="btn btn-primary" onclick="exportUsers()"><i class="fas fa-download"></i> Export Users</button>'
+       
     ); 
     ?>
     

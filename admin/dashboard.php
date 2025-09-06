@@ -310,45 +310,7 @@ startAdminLayout('Admin Dashboard', 'dashboard');
     ); 
     ?>
     
-    <!-- Statistics Cards -->
-    <div class="dashboard-grid">
-        <div class="stat-card">
-            <h3>Total Users</h3>
-            <div class="stat-number"><?php echo number_format($stats['total_users']); ?></div>
-            <div class="stat-change">
-                <i class="fas fa-arrow-up"></i>
-                +<?php echo $stats['new_users_month']; ?> this month
-            </div>
-        </div>
-        
-        <div class="stat-card">
-            <h3>Total Appointments</h3>
-            <div class="stat-number"><?php echo number_format($stats['total_appointments']); ?></div>
-            <div class="stat-change">
-                <i class="fas fa-calendar"></i>
-                <?php echo $stats['today_appointments']; ?> today
-            </div>
-        </div>
-        
-        <div class="stat-card">
-            <h3>Confirmed Appointments</h3>
-            <div class="stat-number"><?php echo number_format($stats['confirmed_appointments']); ?></div>
-            <div class="stat-change">
-                <i class="fas fa-check-circle"></i>
-                Active bookings
-            </div>
-        </div>
-        
-        <div class="stat-card">
-            <h3>Monthly Revenue</h3>
-            <div class="stat-number">$<?php echo number_format($stats['monthly_revenue'] ?? 0); ?></div>
-            <div class="stat-change">
-                <i class="fas fa-dollar-sign"></i>
-                This month
-            </div>
-        </div>
-    </div>
-    
+  
     <!-- Charts Section -->
     <div class="charts-grid">
         <!-- Monthly Sales Chart -->

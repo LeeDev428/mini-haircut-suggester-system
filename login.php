@@ -143,14 +143,7 @@ if ($_POST) {
                         </div>
                     </div>
 
-                    <div class="form-options">
-                        <label class="checkbox-label">
-                            <input type="checkbox" name="remember">
-                            <span class="checkmark"></span>
-                            Remember me
-                        </label>
-                    </div>
-
+                  
                     <button type="submit" class="btn btn-primary btn-full">
                         <i class="fas fa-sign-in-alt"></i>
                         Sign In
